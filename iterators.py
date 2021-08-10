@@ -98,3 +98,53 @@ class InOrderIterator:
 
     def __iter__(self):
         return self
+
+
+missing = object()
+
+
+# This class iterate an imperfect tree using  the "missing" word to occupy
+# the missing positions. Ex: iterator = ["+", "r", "*", missing, missing, "p", "q"]
+class SkipMissingIterator:
+
+    def __init__(self, iterator):
+        self._iterator = iter(iterator)
+
+    def __next__(self):
+        while True:
+            item = next(self._iterator)
+            if item is not missing:
+                return item
+
+    def __iter__(self):
+        return self
+
+
+# This class iterates an iterator composed of symbols like "* or /"
+# and transform them.
+class TranslationIterator:
+
+    def __init__(self, table, iterator):
+        self.table = table
+        self.iterator = iterator
+
+    def __next__(self):
+        item = next(self.iterator)
+        return self.table.get(item, item)
+
+    def __iter__(self):
+        return self
+
+
+class PerfectBinaryTree:
+
+    def __init__(self, breadth_first_items):
+        self._sequence = tuple(breadth_first_items)
+        if not _is_perfect_length(self._sequence):
+            raise ValueError(
+                f"Sequence of length {len(self._sequence)} does not represent "
+                "a perfect binary tree with length 2^n - 1"
+            )
+
+    def __iter__(self):
+        return SkipMissingIterator(PreOrderIterator(self._sequence))
